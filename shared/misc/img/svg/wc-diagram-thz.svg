@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <style>
+      .wire { fill: none; stroke: #000; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .box { fill: #fff; stroke: #000; stroke-width: 2.5; }
+      .text-label { font-family: "Arial", "Microsoft YaHei", sans-serif; font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #000; }
+      .cup-outline { fill: none; stroke: #000; stroke-width: 2.5; }
+      .cup-text { font-family: "Arial", sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #111; }
+      .title-text { font-family: "Arial", "Microsoft YaHei", sans-serif; font-size: 22px; font-weight: bold; text-anchor: middle; fill: #000; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <path class="wire" d="M 100 150 L 100 450 L 170 450" />
+  <path class="wire" d="M 700 150 L 700 450 L 630 450" />
+
+  <path class="wire" d="M 100 150 L 240 150" />
+  <line x1="240" y1="125" x2="240" y2="175" stroke="#000" stroke-width="3" /> <line x1="260" y1="135" x2="260" y2="165" stroke="#000" stroke-width="5" /> <text x="250" y="100" class="title-text">WC</text>
+  <path class="wire" d="M 260 150 L 350 150" />
+
+  <circle cx="350" cy="150" r="4" fill="#000" />
+  <circle cx="420" cy="150" r="4" fill="#000" />
+  <path class="wire" d="M 350 150 L 410 115" /> <path class="wire" d="M 420 150 L 555 150" />
+
+  <circle cx="580" cy="150" r="25" class="box" />
+  <path class="wire" d="M 562 132 L 598 168" />
+  <path class="wire" d="M 562 168 L 598 132" />
+  <text x="580" y="200" class="title-text">大電球</text>
+  <path class="wire" d="M 605 150 L 700 150" />
+
+  <rect x="170" y="430" width="60" height="40" class="box" />
+  <text x="200" y="450" class="text-label">ZSR</text>
+  <path class="wire" d="M 230 450 L 300 450" />
+  <path class="wire" d="M 185 380 L 185 430" />
+  <path class="wire" d="M 215 380 L 215 430" />
+  <path d="M 165 350 C 165 390, 235 390, 235 350 Z" fill="#E0E0E0" stroke="#000" stroke-width="2.5" />
+  <path d="M 165 340 L 165 350 M 235 340 L 235 350" class="cup-outline" />
+  <text x="200" y="365" class="cup-text">Ag</text>
+
+
+  <circle cx="300" cy="450" r="4" fill="#000" /> <circle cx="500" cy="450" r="4" fill="#000" /> <path class="wire" d="M 300 450 L 300 390 L 370 390" />
+  <rect x="370" y="370" width="60" height="40" class="box" />
+  <text x="400" y="390" class="text-label">LRD</text>
+  <path class="wire" d="M 430 390 L 500 390 L 500 450" />
+  
+  <path class="wire" d="M 300 450 L 370 450" />
+  <rect x="370" y="430" width="60" height="40" class="box" />
+  <text x="400" y="450" class="text-label">ZYR</text>
+  <path class="wire" d="M 430 450 L 500 450" />
+  
+  <path class="wire" d="M 300 450 L 300 510 L 370 510" />
+  <rect x="370" y="490" width="60" height="40" class="box" />
+  <text x="400" y="510" class="text-label">ZYH</text>
+  <path class="wire" d="M 430 510 L 500 510 L 500 450" />
+
+  <path class="wire" d="M 385 320 L 385 370" />
+  <path class="wire" d="M 415 320 L 415 370" />
+  <path d="M 365 290 C 365 330, 435 330, 435 290 Z" fill="#D97A46" stroke="#000" stroke-width="2.5" />
+  <path d="M 365 280 L 365 290 M 435 280 L 435 290" class="cup-outline" />
+  <text x="400" y="305" class="cup-text">Cu</text>
+
+
+  <path class="wire" d="M 500 450 L 570 450" />
+  <rect x="570" y="430" width="60" height="40" class="box" />
+  <text x="600" y="450" class="text-label">YC</text>
+  <path class="wire" d="M 585 380 L 585 430" />
+  <path class="wire" d="M 615 380 L 615 430" />
+  <path d="M 565 350 C 565 390, 635 390, 635 350 Z" fill="#A0A0A0" stroke="#000" stroke-width="2.5" />
+  <path d="M 565 340 L 565 350 M 635 340 L 635 350" class="cup-outline" />
+  <text x="600" y="365" class="cup-text">Fe</text>
+
+</svg>
