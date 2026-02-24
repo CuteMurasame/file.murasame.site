@@ -102,7 +102,7 @@
   <use href="#sheep" x="406" y="216" color="#54A0FF"/>
 
   <!-- Red sheep — col4, row4 -->
-  <use href="#sheep" x="320" y="303" color="#FF6B6B"/>
+  <use href="#sheep" x="233" y="303" color="#FF6B6B"/>
 
   <!-- Blue sheep — col4, row5 -->
   <use href="#sheep" x="233" y="390" color="#54A0FF"/>
