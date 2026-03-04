@@ -1,20 +1,25 @@
 // ==UserScript==
 // @name         Luogu Article2PDF
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  将洛谷专栏快速打印为 PDF。
 // @author       Murasame & Gemini
 // @match        *://www.luogu.com.cn/article/*
 // @match        *://www.luogu.com/article/*
 // @require      https://fastly.jsdelivr.net/npm/sweetalert2@11
-// @license      MIT
 // ==/UserScript==
 
 (function() {
     'use strict';
 
+    if (typeof window.Swal === 'undefined') {
+        const swalScript = document.createElement('script');
+        swalScript.src = 'https://fastly.jsdelivr.net/npm/sweetalert2@11';
+        document.head.appendChild(swalScript);
+    }
+
     const DEFAULT_CONFIG = {
-        mainFont: 'Lato, "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif',
+        mainFont: 'Lato, "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif',
         codeFont: '"Fira Code", Consolas, Monaco, monospace',
         showCodeBlockBorder: true,
         showLineNumbers: true
@@ -39,8 +44,10 @@
         const overlay = document.createElement('div');
         overlay.id = 'gemini-pdf-modal';
         overlay.style.position = 'fixed';
-        overlay.style.top = '0'; overlay.style.left = '0';
-        overlay.style.width = '100vw'; overlay.style.height = '100vh';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
         overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
         overlay.style.zIndex = '999999';
         overlay.style.display = 'none';
@@ -57,27 +64,22 @@
 
         modal.innerHTML = `
             <h3 style="margin-top:0; margin-bottom: 20px; font-size: 18px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">PDF 打印高级设置</h3>
-
             <div style="margin-bottom: 15px;">
-                <label style="display:block; font-size: 14px; margin-bottom: 5px; color: #555;">正文字体：</label>
+                <label style="display:block; font-size: 14px; margin-bottom: 5px; color: #555;">正文字体（留空使用默认）：</label>
                 <input id="cfg-mainFont" type="text" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" />
             </div>
-
             <div style="margin-bottom: 15px;">
                 <label style="display:block; font-size: 14px; margin-bottom: 5px; color: #555;">代码块字体：</label>
                 <input id="cfg-codeFont" type="text" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" />
             </div>
-
             <div style="margin-bottom: 15px; display: flex; align-items: center;">
                 <input id="cfg-border" type="checkbox" style="margin-right: 8px; width: 16px; height: 16px;" />
                 <label for="cfg-border" style="font-size: 14px; color: #333; cursor: pointer;">为代码块添加边框</label>
             </div>
-
             <div style="margin-bottom: 25px; display: flex; align-items: center;">
                 <input id="cfg-linenum" type="checkbox" style="margin-right: 8px; width: 16px; height: 16px;" />
                 <label for="cfg-linenum" style="font-size: 14px; color: #333; cursor: pointer;">显示代码块行号</label>
             </div>
-
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button id="cfg-cancel" style="padding: 8px 16px; border: none; background: #e0e0e0; color: #333; border-radius: 4px; cursor: pointer;">取消</button>
                 <button id="cfg-save" style="padding: 8px 16px; border: none; background: #3498db; color: #fff; border-radius: 4px; cursor: pointer;">保存</button>
@@ -88,7 +90,6 @@
         document.body.appendChild(overlay);
 
         document.getElementById('cfg-cancel').onclick = () => overlay.style.display = 'none';
-
         document.getElementById('cfg-save').onclick = () => {
             const newCfg = {
                 mainFont: document.getElementById('cfg-mainFont').value,
@@ -98,13 +99,15 @@
             };
             saveConfig(newCfg);
             overlay.style.display = 'none';
-            Swal.fire({
-                icon: 'success',
-                title: '保存成功',
-                text: '设置已保存！下次点击“打印为 PDF”时生效。',
-                confirmButtonColor: '#3498db',
-                timer: 2000
-            });
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '保存成功',
+                    text: '设置已保存！下次点击“打印为 PDF”时生效。',
+                    confirmButtonColor: '#3498db',
+                    timer: 2000
+                });
+            }
         };
     }
 
@@ -117,7 +120,6 @@
         document.getElementById('cfg-linenum').checked = cfg.showLineNumbers;
         document.getElementById('gemini-pdf-modal').style.display = 'flex';
     }
-
 
     function injectPrintButton() {
         if (document.getElementById('gemini-print-wrapper')) return;
@@ -164,6 +166,18 @@
         settingsBtn.addEventListener('click', openSettingsModal);
 
         printBtn.addEventListener('click', () => {
+            if (!content) {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '未检测到内容',
+                        text: '未找到 .lfe-marked 元素，请确保页面已完全加载！',
+                        confirmButtonColor: '#3498db'
+                    });
+                }
+                return;
+            }
+
             const CONFIG = getConfig();
             const hiddenElements = [];
             const detailsStates = [];
@@ -212,7 +226,7 @@
                 preStates.push({
                     el: pre,
                     cssText: pre.style.cssText,
-                    injectedEl: null,
+                    originalHTML: code.innerHTML,
                     classList: Array.from(pre.classList)
                 });
 
@@ -222,27 +236,25 @@
 
                 if (CONFIG.showLineNumbers) {
                     const codeStyle = window.getComputedStyle(code);
-                    const preStyle = window.getComputedStyle(pre);
-
-                    const linesCount = code.textContent.replace(/\n$/, '').split('\n').length;
-
-                    const lineNumContainer = document.createElement('div');
-                    lineNumContainer.className = 'gemini-print-linenumbers';
-
-                    lineNumContainer.style.paddingTop = preStyle.paddingTop;
-                    lineNumContainer.style.paddingBottom = preStyle.paddingBottom;
-
-                    let numsHTML = '';
-                    for (let i = 1; i <= linesCount; i++) {
-                        numsHTML += `<div style="line-height: ${codeStyle.lineHeight}; font-size: ${codeStyle.fontSize}; font-family: ${CONFIG.codeFont || codeStyle.fontFamily};">${i}</div>`;
+                    const fontFamily = CONFIG.codeFont || codeStyle.fontFamily;
+                    let htmlContent = code.innerHTML.replace(/\n$/, '');
+                    let lines = htmlContent.split('\n');
+                    while (lines.length > 0) {
+                        let lastLineText = lines[lines.length - 1].replace(/<[^>]*>/g, '').trim();
+                        if (lastLineText === '') {
+                            lines.pop();
+                        } else {
+                            break;
+                        }
                     }
-                    lineNumContainer.innerHTML = numsHTML;
 
-                    pre.style.position = 'relative';
-                    pre.style.paddingLeft = '3.5em';
-                    pre.appendChild(lineNumContainer);
+                    let newHTML = lines.map((line, index) => {
+                        let num = index + 1;
+                        let fontSizeStyle = codeStyle.fontSize;
+                        return `<div class="gemini-code-line"><span class="gemini-line-num" style="font-size: ${fontSizeStyle}; font-family: ${fontFamily};">${num}</span><span class="gemini-line-content">${line}</span></div>`;
+                    }).join('');
 
-                    preStates[preStates.length - 1].injectedEl = lineNumContainer;
+                    code.innerHTML = newHTML;
                 }
             });
 
@@ -292,20 +304,44 @@
                         border-radius: 6px !important;
                         box-shadow: none !important;
                     }
-
-                    .gemini-print-linenumbers {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        bottom: 0 !important;
-                        width: 2.5em !important;
-                        background-color: #f8f9fa !important;
-                        border-right: 1px solid #e5e7eb !important;
+                    .lfe-marked pre {
+                        padding: 0 !important;
+                        background: #ffffff !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .gemini-line-num {
+                        flex-shrink: 0 !important;
+                        width: 3.5em !important;
                         text-align: right !important;
-                        padding-right: 0.6em !important;
+                        padding-right: 0.8em !important;
+                        box-sizing: border-box !important;
                         color: #9ca3af !important;
                         user-select: none !important;
-                        box-sizing: border-box !important;
+                        background-color: #f8f9fa !important;
+                        border-right: 1px solid #d1d5db !important;
+                    }
+                    .gemini-code-line:first-child .gemini-line-num,
+                    .gemini-code-line:first-child .gemini-line-content {
+                        padding-top: 1em !important;
+                    }
+                    .gemini-code-line:last-child .gemini-line-num,
+                    .gemini-code-line:last-child .gemini-line-content {
+                        padding-bottom: 1em !important;
+                    }
+                    .gemini-code-line {
+                        display: flex !important;
+                        align-items: stretch !important;
+                        width: 100% !important;
+                        page-break-inside: avoid !important;
+                    }
+                    .gemini-line-content {
+                        flex-grow: 1 !important;
+                        padding-left: 0.8em !important;
+                        white-space: pre-wrap !important;
+                        word-wrap: break-word !important;
+                        overflow-wrap: anywhere !important;
+                        min-height: 1.5em;
                     }
                 }
             `;
@@ -338,8 +374,9 @@
                 preStates.forEach(item => {
                     item.el.style.cssText = item.cssText;
                     item.el.className = item.classList.join(' ');
-                    if (item.injectedEl && item.injectedEl.parentNode) {
-                        item.injectedEl.parentNode.removeChild(item.injectedEl);
+                    if (item.originalHTML !== undefined) {
+                        const code = item.el.querySelector('code');
+                        if (code) code.innerHTML = item.originalHTML;
                     }
                 });
 
